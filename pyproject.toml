@@ -16,6 +16,7 @@ dependencies = [
 [project.scripts]
 validator = "main:main"
 strip-locations = "strip_locations:main"
+clean-connectivity = "clean_connectivity:main"
 
 [tool.uv]
 package = true
