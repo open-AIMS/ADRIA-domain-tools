@@ -1,29 +1,84 @@
-# ADRIA Domain Validator
+# ADRIA Domain Tools
 
-A CLI tool to validate ADRIA Domain Data Packages.
+A collection of utility CLI tools to validate, normalize, and process ADRIA Domain Data Packages.
 
 ## Prerequisites
 
-- [uv](https://github.com/astral-sh/uv) must be installed.
+- [uv](https://github.com/astral-sh/uv) (recommended Python package manager)
 
-## Usage
+## Installation
 
-Run the validator from this directory:
+To sync the dependencies and set up the virtual environment:
 
+```bash
+uv sync
+```
+
+## CLI Tools
+
+### 1. Domain Validator
+Validates that an ADRIA Domain Data Package meets the required specifications.
+
+**Usage:**
+```bash
+uv run validator <path_to_domain_directory>
+```
+Or directly via script:
 ```bash
 uv run src/main.py <path_to_domain_directory>
 ```
 
-## Checks Performed
-
+**Checks Performed:**
 1.  **Schema Validation**: Verifies `datapackage.json` against the expected Pydantic schema.
-2.  **Resource Existence**: Checks that all files listed in `resources` exist.
-3.  **Naming Conventions**: Ensures the spatial GeoPackage matches the domain name (e.g., `spatial/MyDomain.gpkg`).
-4.  **Directory Structure**: Checks for standard subdirectories (connectivity, cyclones, etc.).
+2.  **Resource Existence**: Checks that all files and folders listed in the `resources` block exist.
+3.  **Naming Conventions**: Ensures the spatial GeoPackage filename matches the domain directory name.
+4.  **Content Checks**: Validates NetCDF dimensions and coordinate variables (`locations`, `timesteps`, etc.), and checks that location IDs in NetCDF and connectivity CSV headers match the GeoPackage.
+
+---
+
+### 2. Strip Locations
+Strips locations that have a carrying capacity ($k$) equal to `0.0` from all files in the domain.
+
+**Usage:**
+```bash
+uv run strip-locations <path_to_domain_directory>
+```
+Or directly via script:
+```bash
+uv run src/strip_locations.py <path_to_domain_directory>
+```
+
+**Actions Performed:**
+1.  Loads the spatial GeoPackage and reads the carrying capacity column (`k` by default) to identify locations with a value of `0.0`.
+2.  Filters out matching locations from the GeoPackage.
+3.  Filters the `locations` dimension of NetCDF files (e.g., DHW, cyclones, coral cover, waves).
+4.  Filters matching rows and columns from connectivity CSV matrices.
+5.  Saves updated files in-place and documents the removed location IDs under the `"removed_locations"` key in `datapackage.json`.
+
+---
+
+### 3. Clean Connectivity
+Normalizes location IDs in the connectivity matrices by removing space characters.
+
+**Usage:**
+```bash
+uv run clean-connectivity <path_to_domain_directory>
+```
+Or directly via script:
+```bash
+uv run src/clean_connectivity.py <path_to_domain_directory>
+```
+
+**Actions Performed:**
+1.  Reads the row index and column headers of CSV files in the connectivity directory.
+2.  Strips space characters (e.g., `Outer Flat` becomes `OuterFlat`) to match the canonical IDs used in the GeoPackage.
+3.  Saves the updated CSV matrices in-place, preserving any comment headers.
+4.  Documents the original IDs that had spaces removed under the `"normalized_connectivity_ids"` key in `datapackage.json`.
+
+---
 
 ## Development
 
-Project is managed with `uv`.
+The project is managed with `uv`.
 
-- Install dependencies: `uv sync`
-- Add dependencies: `uv add <package>`
+- To add a dependency: `uv add <package_name>`
