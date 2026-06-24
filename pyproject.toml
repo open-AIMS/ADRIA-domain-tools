@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 validator = "main:main"
+strip-locations = "strip_locations:main"
 
 [tool.uv]
 package = true
