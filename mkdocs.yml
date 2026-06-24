@@ -1,0 +1,5 @@
+site_name: ADRIA Domain Tools
+theme:
+  name: material
+nav:
+  - Introduction: index.md
