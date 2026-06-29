@@ -61,4 +61,10 @@ Some modeling workflows require the removal of locations that cannot support cor
 ### Clean Connectivity (`clean-connectivity`)
 Raw connectivity datasets may contain location names formatted with spaces (e.g., `Outer Flat`), while spatial GeoPackages use space-stripped names (e.g., `OuterFlat`). This tool resolves name mismatches.
 *   **Header Normalization**: Strips spaces from the row and column headers in connectivity CSV files.
-*   **Metadata Logging**: Records the original site IDs that underwent space-stripping under the `normalized_connectivity_ids` field within `datapackage.json`.
+*   **Metadata Logging**: Records that space cleaning was performed by setting the `connectivity_spaces_removed` boolean flag to `true` within `datapackage.json`.
+
+### Align Connectivity (`align-connectivity`)
+Raw connectivity datasets may contain mismatched site IDs that need to be mapped to the correct site names in the spatial GeoPackage. This tool corrects specific mapping mismatches.
+*   **Command Option**: Takes a JSON mapping string of indices/site-names to correct site names (e.g., `--map-json '{"89": "Lizard_14116A_OuterFlat_1f"}'`).
+*   **Header Alignment**: Replaces the mismatched row and column headers in connectivity CSV files.
+*   **Metadata Logging**: Records the clean dictionary mapping (original name to new canonical name) under the `aligned_connectivity_ids` field in `datapackage.json`.

@@ -73,7 +73,32 @@ uv run src/clean_connectivity.py <path_to_domain_directory>
 1.  Reads the row index and column headers of CSV files in the connectivity directory.
 2.  Strips space characters (e.g., `Outer Flat` becomes `OuterFlat`) to match the canonical IDs used in the GeoPackage.
 3.  Saves the updated CSV matrices in-place, preserving any comment headers.
-4.  Documents the original IDs that had spaces removed under the `"normalized_connectivity_ids"` key in `datapackage.json`.
+4.  Documents that space cleaning was performed by setting `"connectivity_spaces_removed": true` in `datapackage.json`.
+
+---
+
+### 4. Align Connectivity
+Aligns mismatched connectivity site names with the canonical location IDs from the spatial GeoPackage.
+
+**Usage:**
+```bash
+uv run align-connectivity --map-json '<mapping_json>' <path_to_domain_directory>
+```
+Example:
+```bash
+uv run align-connectivity --map-json '{"89": "Lizard_14116A_OuterFlat_1f"}' /path/to/Lizard_domain
+```
+Or directly via script:
+```bash
+uv run src/align_connectivity.py --map-json '<mapping_json>' <path_to_domain_directory>
+```
+
+**Actions Performed:**
+1.  Loads the spatial GeoPackage and reads the canonical location IDs (`reef_siteid`).
+2.  Parses the JSON mapping (can map either indices or raw names to new canonical names).
+3.  Validates that all target names exist in the spatial GeoPackage before applying changes.
+4.  Scans and updates the row and column headers in connectivity CSV matrices in-place.
+5.  Documents the clean, unique mapping dictionary under the `"aligned_connectivity_ids"` key in `datapackage.json`.
 
 ---
 

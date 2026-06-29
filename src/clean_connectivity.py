@@ -92,22 +92,26 @@ def main():
 
     print(f"Scan complete. Checked {total_files_count} files.")
     
-    if modified_files_count == 0:
+    # Proceed to update if files were modified, or if we need to migrate/cleanup the old list format
+    has_old_format = "normalized_connectivity_ids" in dpkg_data
+    if modified_files_count == 0 and not has_old_format:
         print("No space-containing site IDs found in connectivity matrices. Nothing to clean.")
         return
 
     print(f"Cleaned {modified_files_count} of {total_files_count} connectivity files.")
     print(f"Total unique IDs normalized: {len(cleaned_ids)}")
     
-    # Document normalized IDs in datapackage.json
-    existing_normalized = dpkg_data.get("normalized_connectivity_ids", [])
-    combined_normalized = sorted(list(set(existing_normalized + list(cleaned_ids))))
-    dpkg_data["normalized_connectivity_ids"] = combined_normalized
+    # Document space removal in datapackage.json
+    dpkg_data["connectivity_spaces_removed"] = True
+    
+    # Remove the old list field if it exists
+    if "normalized_connectivity_ids" in dpkg_data:
+        del dpkg_data["normalized_connectivity_ids"]
 
     with open(dpkg_path, "w") as f:
         json.dump(dpkg_data, f, indent=4)
         
-    print(f"datapackage.json updated with 'normalized_connectivity_ids' list containing {len(combined_normalized)} IDs.")
+    print("datapackage.json updated: set 'connectivity_spaces_removed' to true.")
     print("Clean operation complete.")
 
 if __name__ == "__main__":
